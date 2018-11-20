@@ -18,6 +18,14 @@ int SingleCalibrater::readStringList(const std::string & filename, std::vector<s
 int SingleCalibrater::SetImageList(std::string xmlListFile)
 {
 	this->_xmlListFile = xmlListFile;
+	this->_listFile.resize(0);
+	return 0;
+}
+
+int SingleCalibrater::SetImageList(std::vector<std::string> listFile)
+{
+	this->_xmlListFile = "";
+	this->_listFile = listFile;
 	return 0;
 }
 
@@ -31,7 +39,7 @@ int SingleCalibrater::SetBoardSize(int cornerWidth, int cornerHeight, double squ
 
 int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 {
-	if (_xmlListFile == "")
+	if (_xmlListFile == "" && _listFile.size() == 0)
 	{
 		SysUtil::errorOutput("SingleCalibrater::Calibrate xmlListFile not set.");
 		return -1;
@@ -42,12 +50,13 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 		return -1;
 	}
 
-	std::vector<std::string> fileList;
-	if (readStringList(_xmlListFile, fileList) != 0)
-	{
-		SysUtil::errorOutput("SingleCalibrater::Calibrate file list read error.");
-		return -1;
-	}
+	std::vector<std::string> fileList = _listFile;
+	if (_xmlListFile != "")
+		if(readStringList(_xmlListFile, fileList) != 0)
+		{
+			SysUtil::errorOutput("SingleCalibrater::Calibrate file list read error.");
+			return -1;
+		}
 
 	_imageSize = cv::Size(cv::imread(fileList[0]).size());
 	cv::Size boardSize(_cornerWidth, _cornerHeight);

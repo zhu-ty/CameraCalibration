@@ -25,6 +25,7 @@ private:
 	const int flags = cv::CALIB_USE_INTRINSIC_GUESS | cv::CALIB_FIX_ASPECT_RATIO | cv::CALIB_TILTED_MODEL | cv::CALIB_FIX_K3 | cv::CALIB_FIX_K4 | cv::CALIB_FIX_K5;
 
 	std::string _xmlListFile;
+	std::vector<std::string> _listFile;
 	int _cornerWidth, _cornerHeight;
 	double _squareSize;
 
@@ -40,11 +41,14 @@ public:
 		_cornerWidth = 0;
 		_cornerHeight = 0;
 		_squareSize = 0;
+		_listFile.resize(0);
 	};
 	~SingleCalibrater() {};
 
 
 	int SetImageList(std::string xmlListFile);
+
+	int SetImageList(std::vector<std::string> listFile);
 
 	int SetBoardSize(int cornerWidth, int cornerHeight, double squareSize);
 
