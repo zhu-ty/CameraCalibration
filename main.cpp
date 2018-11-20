@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 
     SingleCalibrater SinCal;
 
-    if(reader.GetBoolean("CameraCalibration","UseListFile","false") == true)
+    if(reader.GetBoolean("CameraCalibration","UseListFile",false) == true)
         SinCal.SetImageList(reader.Get("CameraCalibration", "ImageList", ""));
     else
     {
