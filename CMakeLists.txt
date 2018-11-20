@@ -34,6 +34,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 set(MY_HEADER_FILES
 	SingleCameraCalibration.h
+	StereoCameraCalibration.h
 	INIReader.h
 	SysUtil.hpp
 )
@@ -41,6 +42,7 @@ set(MY_HEADER_FILES
 set(MY_SOURCE_FILES 
 	main.cpp
 	SingleCameraCalibration.cpp
+	StereoCameraCalibration.cpp
 )
 include_directories(
 	${PROJECT_SOURCE_DIR}	

@@ -65,6 +65,9 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 	{
 		std::vector<cv::Point2f> pointBuf;
 		cv::Mat img = cv::imread(fileList[i]);
+
+		
+
 		bool found = cv::findChessboardCorners(img, boardSize, pointBuf,
 			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK);
 		if (found)
@@ -75,6 +78,11 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 				cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.1));
 			_imagePoints.push_back(pointBuf);
 			SysUtil::infoOutput("Found corners in image " + fileList[i]);
+
+			
+			//cv::drawChessboardCorners(img, boardSize, pointBuf, true);
+			//cv::imshow("hello", img);
+			//cv::waitKey(0);
 		}
 		else
 		{
@@ -113,6 +121,13 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 	}
 	cameraMatrix = _cameraMatrix;
 	distCoeffs = _distCoeffs;
+
+	for (int i = 0; i < fileList.size(); i++)
+	{
+		cv::Mat img = cv::imread(fileList[i]);
+		cv::Mat tmp = img.clone();
+		cv::undistort(img, tmp, _cameraMatrix, _distCoeffs);
+	}
 
 	return 0;
 }
