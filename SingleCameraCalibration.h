@@ -50,7 +50,7 @@ public:
 
 	int Calibrate(cv::Mat &cameraMatrix, cv::Mat &distCoeffs);
 
-	int saveParams(std::string file);
+	int SaveParams(std::string file);
 };
 
 #endif //__CAMERA_CALIBRATION_SINGLE__

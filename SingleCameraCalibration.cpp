@@ -108,7 +108,7 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 	return 0;
 }
 
-int SingleCalibrater::saveParams(std::string file)
+int SingleCalibrater::SaveParams(std::string file)
 {
 	cv::FileStorage fs(file, cv::FileStorage::WRITE);
 	fs << "image_width" << _imageSize.width;
