@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
         std::vector<std::string> imageNames;
         std::vector<std::string> allowedExtensions = { ".jpg", ".png" ,".jpeg"};
         for (int i = 0; i < allowedExtensions.size(); i++) {
-            std::vector<std::string> imageNamesCurrentExtension;
+            std::vector<cv::String> imageNamesCurrentExtension;
             cv::glob(
                 inputFolder + "/*" + allowedExtensions[i],
                 imageNamesCurrentExtension,
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 
     cv::Mat cM,dC;
     SinCal.Calibrate(cM, dC);
-    SinCal.saveParams(eader.Get("CameraCalibration", "OutputFile", "./result.xml"));
+    SinCal.SaveParams(reader.Get("CameraCalibration", "OutputFile", "./result.xml"));
     SysUtil::infoOutput("done!");
 
     return 0;
