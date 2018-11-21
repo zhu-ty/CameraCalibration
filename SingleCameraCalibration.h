@@ -17,7 +17,12 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
 
-#define ASPECT_RATIO 1.0
+//#define ASPECT_RATIO 1.0
+#ifdef _DEBUG
+#define FIND_POINT_TIMEOUT_MS 5000
+#else
+#define FIND_POINT_TIMEOUT_MS 2000
+#endif
 
 class SingleCalibrater
 {
@@ -56,6 +61,10 @@ public:
 	int Calibrate(cv::Mat &cameraMatrix, cv::Mat &distCoeffs);
 
 	int SaveParams(std::string file);
+
+	// 1:found 0:not found -1:timeout
+	static int findChessboardCornersTimeout
+	(cv::Mat &img, cv::Size &boardSize, std::vector<cv::Point2f> &out_pointList, int flag, int timeoutMs);
 };
 
 #endif //__CAMERA_CALIBRATION_SINGLE__
