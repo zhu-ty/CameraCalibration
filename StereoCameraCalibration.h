@@ -21,7 +21,21 @@
 class StereoCalibrater
 {
 private:
-	
+	std::vector<std::pair<std::string, std::string>> _pairFiles;
+	int _cornerWidth, _cornerHeight;
+	double _squareSize;
+	cv::Size _imageSize;
+
+	struct
+	{
+		cv::Mat _cameraMatrix, _distCoeffs;
+	} _cameraIntrinsics[2];
+public:
+	int SetImageList(std::vector<std::string> listFile);
+
+	int SetBoardSize(int cornerWidth, int cornerHeight, double squareSize);
+
+
 };
 
 #endif //__CAMERA_CALIBRATION_STEREO__
