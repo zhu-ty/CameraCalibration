@@ -62,6 +62,16 @@
 
 #endif
 
+#define DEBUG_STRING std::string("file: " +   \
+((std::string(__FILE__).find_last_of("/") != std::string::npos || std::string(__FILE__).find_last_of("\\") != std::string::npos) ?   \
+ (  \
+(std::string(__FILE__).find_last_of("\\") != std::string::npos) ? \
+ std::string(__FILE__).erase(0, std::string(__FILE__).find_last_of("\\") + 1) : \
+ std::string(__FILE__).erase(0, std::string(__FILE__).find_last_of("/") + 1) \
+ )   \
+ : std::string(__FILE__))  \
++ " line: " + std::to_string(__LINE__) +" func: " + std::string(__func__) +"\n") 
+ 
 
 class SysUtil {
 private:

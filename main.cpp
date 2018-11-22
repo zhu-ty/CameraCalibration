@@ -5,9 +5,24 @@
 #include "INIReader.h"
 #include "SysUtil.hpp"
 #include "SingleCameraCalibration.h"
+#include "StereoCameraCalibration.h"
 
 int main(int argc, char* argv[]) 
 {
+	//std::string a1 = "00001.png";
+	//std::string a2 = "00002.png";
+	//std::string a10 = "00010.png";
+	//int c1 = a1.compare(a2); //< 0
+	//int c2 = a1.compare(a10); //< 0
+	//int c3 = a2.compare(a10); //< 0
+
+	std::string a2;
+
+	cv::Mat a, b, c, d, e, f, g;
+	StereoCalibrater SC;
+	SC.Calibrate(a, b, c, d, e, f, g);
+
+
     std::string configFile = "./CCConfig.ini";
     if(argc > 1)
     {
