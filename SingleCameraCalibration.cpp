@@ -68,9 +68,6 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 	{
 		std::vector<cv::Point2f> pointBuf;
 		cv::Mat img = cv::imread(fileList[i]);
-
-		
-
 		//bool found = cv::findChessboardCorners(img, boardSize, pointBuf,
 		//	cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK);
 		//if (found)
@@ -198,18 +195,19 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 	//std::mutex m;
 	//std::condition_variable cv;
 	bool retValue;
-	bool overtime = false;
 	bool running = true;
-
+#if defined(_WIN32) || defined(WIN32)
 	int thread_id;
-
+#endif
 	std::thread t([&]()
 	{
 		retValue = false;
-
 #if defined(_WIN32) || defined(WIN32)
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		thread_id = GetCurrentThreadId();
+#else
+		int *x;
+		pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,x);
 #endif
 
 		bool found = cv::findChessboardCorners(img, boardSize, tmp_out_pointList, flag);
@@ -226,24 +224,13 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 			retValue = false;
 		}
 		running = false;
-		//if(!overtime)
-		//	cv.notify_one();
+
 	});
+#if !(defined(_WIN32) || defined(WIN32))
+	pthread_t thread_handle = t.native_handle();
+#endif
 	t.detach();
 
-	//std::unique_lock<std::mutex> l(m);
-	//if (cv.wait_for(l, std::chrono::milliseconds(timeoutMs)) == std::cv_status::timeout)
-	//{
-	//	overtime = true;
-	//	return -1;
-	//}
-	//else
-	//{
-	//	if (retValue)
-	//		out_pointList = tmp_out_pointList;
-	//	return (retValue) ? 1 : 0;
-	//}
-	//return -2;
 
 	int i = 0;
 	while (true)
@@ -266,6 +253,8 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 				int result2 = GetLastError();
 				SysUtil::errorOutput(SysUtil::format("TerminateThread error with code %d", result2));
 			}
+#else
+			pthread_cancel(thread_handle);
 #endif
 			return -1;
 		}
@@ -281,74 +270,5 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 			return (retValue) ? 1 : 0;
 		}
 	}
-
-
-
-
-
-	//std::promise<bool> p1;
-	//std::future<bool> future_finding = p1.get_future();
-	//
-	//std::thread([&](std::promise<bool> p1)
-	//{
-	//	p1.set_value_at_thread_exit(false);
-	//	try
-	//	{
-	//		bool found = cv::findChessboardCorners(img, boardSize, tmp_out_pointList, flag);
-	//		if (found)
-	//		{
-	//			cv::Mat imgGray;
-	//			cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
-	//			cv::cornerSubPix(imgGray, tmp_out_pointList, cv::Size(11, 11), cv::Size(-1, -1),
-	//				cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.1));
-	//			p1.set_value_at_thread_exit(true);
-	//		}
-	//		else
-	//		{
-	//			p1.set_value_at_thread_exit(false);
-	//		}
-	//	}
-	//	catch(...)
-	//	{
-	//		p1.set_value_at_thread_exit(false);
-	//	}
-	//	return;
-	//	//p1.set_value_at_thread_exit(9);
-	////},std::move(p1)).detach();
-
-	//std::future<bool> future_finding = std::async(std::launch::async, [&]() {
-	//	bool found = cv::findChessboardCorners(img, boardSize, tmp_out_pointList, flag);
-	//	if (found)
-	//	{
-	//		cv::Mat imgGray;
-	//		cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
-	//		cv::cornerSubPix(imgGray, tmp_out_pointList, cv::Size(11, 11), cv::Size(-1, -1),
-	//			cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.1));
-	//		return true;
-	//	}
-	//	else
-	//	{
-	//		return false;
-	//	}
-	//});
-
-	//std::future_status status;
-	//status = future_finding.wait_for(std::chrono::milliseconds(timeoutMs));
-	////std::cout << "Waiting for 2 seconds..." << std::endl;
-	////std::chrono::system_clock::time_point time_seconds_passed
-	////	= std::chrono::system_clock::now() + std::chrono::milliseconds(timeoutMs);
-	//////std::chrono::system_clock::time_point two_seconds_passed
-	//////	= std::chrono::system_clock::now() + std::chrono::seconds(10);
-	////status = future_finding.wait_until(time_seconds_passed);
-	////std::cout << "Waiting DONE!" << std::endl;
-	//if (status == std::future_status::timeout) {
-	//	return -1;
-	//}
-	//else if (status == std::future_status::ready) {
-	//	auto found_ret = future_finding.get();
-	//	if (found_ret)
-	//		out_pointList = tmp_out_pointList;
-	//	return (found_ret) ? 1 : 0;
-	//}
-	//return -2;
+	return -2;
 }

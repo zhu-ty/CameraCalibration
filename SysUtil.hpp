@@ -28,6 +28,7 @@
 #include <time.h>
 #include <Winsock2.h>
 #else
+#include <signal.h>
 #include <sys/time.h>
 #include <stdarg.h>
 #include <pthread.h>

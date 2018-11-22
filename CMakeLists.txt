@@ -17,6 +17,10 @@ set (CMAKE_CXX_STANDARD 11)
 add_definitions(-D"WIN32_LEAN_AND_MEAN") 
 add_definitions(-D"ASIO_STANDALONE")
 
+if (UNIX)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lpthread")
+endif()
+
 set (WIN_LIB_PATH "E:/libs")
 
 #opencv 
