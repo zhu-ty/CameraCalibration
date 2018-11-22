@@ -4,8 +4,8 @@
 @date: Aug 8, 2018
 */
 
-#ifndef __STEREO_DEPTH_CPP_SYSUTIL_HPP__
-#define __STEREO_DEPTH_CPP_SYSUTIL_HPP__
+#ifndef __SHADOWK_COMMON__
+#define __SHADOWK_COMMON__
 
 #pragma once
 // include stl
@@ -68,7 +68,7 @@
 (std::string(__FILE__).find_last_of("\\") != std::string::npos) ? \
  std::string(__FILE__).erase(0, std::string(__FILE__).find_last_of("\\") + 1) : \
  std::string(__FILE__).erase(0, std::string(__FILE__).find_last_of("/") + 1) \
- )   \
+ )  \
  : std::string(__FILE__))  \
 + " line: " + std::to_string(__LINE__) +" func: " + std::string(__func__) +"\n") 
  
@@ -259,4 +259,4 @@ public:
 	}
 };
 
-#endif //__STEREO_DEPTH_CPP_SYSUTIL_HPP__
+#endif //__SHADOWK_COMMON__

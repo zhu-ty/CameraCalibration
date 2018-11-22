@@ -7,7 +7,7 @@
 #ifndef __CAMERA_CALIBRATION_SINGLE__
 #define __CAMERA_CALIBRATION_SINGLE__
 
-#include "SysUtil.hpp"
+#include "SKCommon.hpp"
 
 #include <opencv2/core.hpp>
 #include <opencv2/core/utility.hpp>
@@ -19,9 +19,9 @@
 
 //#define ASPECT_RATIO 1.0
 #ifdef _DEBUG
-#define FIND_POINT_TIMEOUT_MS 5000
+#define FIND_POINT_TIMEOUT_MS 10000
 #else
-#define FIND_POINT_TIMEOUT_MS 2000
+#define FIND_POINT_TIMEOUT_MS 3000
 #endif
 
 class SingleCalibrater

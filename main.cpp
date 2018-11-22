@@ -3,7 +3,7 @@
 */
 
 #include "INIReader.h"
-#include "SysUtil.hpp"
+#include "SKCommon.hpp"
 #include "SingleCameraCalibration.h"
 #include "StereoCameraCalibration.h"
 
@@ -15,13 +15,6 @@ int main(int argc, char* argv[])
 	//int c1 = a1.compare(a2); //< 0
 	//int c2 = a1.compare(a10); //< 0
 	//int c3 = a2.compare(a10); //< 0
-
-	std::string a2;
-
-	cv::Mat a, b, c, d, e, f, g;
-	StereoCalibrater SC;
-	SC.Calibrate(a, b, c, d, e, f, g);
-
 
     std::string configFile = "./CCConfig.ini";
     if(argc > 1)
@@ -35,13 +28,36 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-    SingleCalibrater SinCal;
 
-    if(reader.GetBoolean("CameraCalibration","UseListFile",false) == true)
-        SinCal.SetImageList(reader.Get("CameraCalibration", "ImageList", ""));
+
+
+
+
+
+    SingleCalibrater SinCal1, SinCal2;
+	StereoCalibrater SteCal;
+	SinCal1.SetBoardSize(
+		reader.GetInteger("CameraCalibration", "BoardWidth", 0),
+		reader.GetInteger("CameraCalibration", "BoardHeight", 0),
+		reader.GetReal("CameraCalibration", "BoardSize", 0)
+	);
+	SinCal2.SetBoardSize(
+		reader.GetInteger("CameraCalibration", "BoardWidth", 0),
+		reader.GetInteger("CameraCalibration", "BoardHeight", 0),
+		reader.GetReal("CameraCalibration", "BoardSize", 0)
+	);
+	SteCal.SetBoardSize(
+		reader.GetInteger("CameraCalibration", "BoardWidth", 0),
+		reader.GetInteger("CameraCalibration", "BoardHeight", 0),
+		reader.GetReal("CameraCalibration", "BoardSize", 0)
+	);
+
+
+    if(reader.GetBoolean("CameraCalibration1","UseListFile",false) == true)
+        SinCal1.SetImageList(reader.Get("CameraCalibration1", "ImageList", ""));
     else
     {
-        std::string inputFolder = reader.Get("CameraCalibration", "ImageDir", ".");
+        std::string inputFolder = reader.Get("CameraCalibration1", "ImageDir", ".");
         std::vector<std::string> imageNames;
         std::vector<std::string> allowedExtensions = { ".jpg", ".png" ,".jpeg"};
         for (int i = 0; i < allowedExtensions.size(); i++) {
@@ -57,17 +73,83 @@ int main(int argc, char* argv[])
                 imageNamesCurrentExtension.end()
             );
         }
-        SinCal.SetImageList(imageNames);
+        SinCal1.SetImageList(imageNames);
     }
-    SinCal.SetBoardSize(
-        reader.GetInteger("CameraCalibration", "BoardWidth", 0),
-        reader.GetInteger("CameraCalibration", "BoardHeight", 0),
-        reader.GetReal("CameraCalibration", "BoardSize", 0)
-    );
+	if (reader.GetBoolean("CameraCalibration2", "UseListFile", false) == true)
+		SinCal2.SetImageList(reader.Get("CameraCalibration2", "ImageList", ""));
+	else
+	{
+		std::string inputFolder = reader.Get("CameraCalibration2", "ImageDir", ".");
+		std::vector<std::string> imageNames;
+		std::vector<std::string> allowedExtensions = { ".jpg", ".png" ,".jpeg" };
+		for (int i = 0; i < allowedExtensions.size(); i++) {
+			std::vector<cv::String> imageNamesCurrentExtension;
+			cv::glob(
+				inputFolder + "/*" + allowedExtensions[i],
+				imageNamesCurrentExtension,
+				true
+			);
+			imageNames.insert(
+				imageNames.end(),
+				imageNamesCurrentExtension.begin(),
+				imageNamesCurrentExtension.end()
+			);
+		}
+		SinCal2.SetImageList(imageNames);
+	}
+   
 
-    cv::Mat cM,dC;
-    SinCal.Calibrate(cM, dC);
-    SinCal.SaveParams(reader.Get("CameraCalibration", "OutputFile", "./result.xml"));
+    cv::Mat cM1,dC1;
+    SinCal1.Calibrate(cM1, dC1);
+    SinCal1.SaveParams(reader.Get("CameraCalibration1", "OutputFile", "./result_left.xml"));
+	cv::Mat cM2, dC2;
+	SinCal2.Calibrate(cM2, dC2);
+	SinCal2.SaveParams(reader.Get("CameraCalibration2", "OutputFile", "./result_right.xml"));
+
+	SteCal.SetCameraIntrinsics(cM1, dC1, cM2, dC2);
+
+	{
+		std::vector<std::string> imageNamesLeft, imageNamesRight;
+		std::vector<std::string> allowedExtensions = { ".jpg", ".png" ,".jpeg" };
+
+		std::string inputFolder = reader.Get("StereoCalibration", "ImageDirLeft", ".");
+		for (int i = 0; i < allowedExtensions.size(); i++) {
+			std::vector<cv::String> imageNamesCurrentExtension;
+			cv::glob(
+				inputFolder + "/*" + allowedExtensions[i],
+				imageNamesCurrentExtension,
+				true
+			);
+			imageNamesLeft.insert(
+				imageNamesLeft.end(),
+				imageNamesCurrentExtension.begin(),
+				imageNamesCurrentExtension.end()
+			);
+		}
+		inputFolder = reader.Get("StereoCalibration", "ImageDirRight", ".");
+		for (int i = 0; i < allowedExtensions.size(); i++) {
+			std::vector<cv::String> imageNamesCurrentExtension;
+			cv::glob(
+				inputFolder + "/*" + allowedExtensions[i],
+				imageNamesCurrentExtension,
+				true
+			);
+			imageNamesRight.insert(
+				imageNamesRight.end(),
+				imageNamesCurrentExtension.begin(),
+				imageNamesCurrentExtension.end()
+			);
+		}
+		SteCal.SetImageListAndPair(imageNamesLeft, imageNamesRight);
+	}
+
+	cv::Mat R, T, R1, R2, P1, P2, Q;
+	SteCal.Calibrate(R, T, R1, R2, P1, P2, Q);
+	SteCal.SaveParams(
+		reader.Get("StereoCalibration", "OutputFile", "./result_stereo.xml"),
+		reader.Get("StereoCalibration", "OutPutParamDir", "./param/")
+	);
+
     SysUtil::infoOutput("done!");
 
     return 0;

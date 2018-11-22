@@ -40,7 +40,7 @@ set(MY_HEADER_FILES
 	SingleCameraCalibration.h
 	StereoCameraCalibration.h
 	INIReader.h
-	SysUtil.hpp
+	SKCommon.hpp
 )
 
 set(MY_SOURCE_FILES 

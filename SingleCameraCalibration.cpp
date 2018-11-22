@@ -96,17 +96,11 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 			_imagePoints.push_back(pointBuf);
 		}
 		else if (found == 0)
-		{
 			SysUtil::warningOutput("Corners not found in image " + fileList[i]);
-		}
 		else if (found == -1)
-		{
 			SysUtil::warningOutput("Corners founding in image " + fileList[i] + " over time!");
-		}
 		else
-		{
 			SysUtil::errorOutput("Unknown error in founding corners in image " + fileList[i]);
-		}
 
 	}
 	if (_imagePoints.size() <= 0)

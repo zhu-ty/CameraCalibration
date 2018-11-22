@@ -7,7 +7,7 @@
 #ifndef __CAMERA_CALIBRATION_STEREO__
 #define __CAMERA_CALIBRATION_STEREO__
 
-#include "SysUtil.hpp"
+#include "SKCommon.hpp"
 
 #include <opencv2/core.hpp>
 #include <opencv2/core/utility.hpp>
@@ -21,6 +21,7 @@
 class StereoCalibrater
 {
 private:
+	const int _flag = cv::CALIB_FIX_INTRINSIC | cv::CALIB_USE_INTRINSIC_GUESS ;
 	std::vector<std::pair<std::string, std::string>> _pairedFiles;
 	int _cornerWidth, _cornerHeight;
 	double _squareSize;
@@ -30,6 +31,8 @@ private:
 	{
 		cv::Mat _cameraMatrix, _distCoeffs;
 	} _cameraIntrinsics[2];
+
+	cv::Mat _R, _T, _R1, _R2, _P1, _P2, _Q;
 public:
 	//Pair 2 img lists, file with same name will be paired
 	int SetImageListAndPair(std::vector<std::string> listFile1, std::vector<std::string> listFile2);
