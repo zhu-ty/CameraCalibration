@@ -52,7 +52,6 @@ int main(int argc, char* argv[])
 		reader.GetReal("CameraCalibration", "BoardSize", 0)
 	);
 
-
     if(reader.GetBoolean("CameraCalibration1","UseListFile",false) == true)
         SinCal1.SetImageList(reader.Get("CameraCalibration1", "ImageList", ""));
     else

@@ -9,7 +9,8 @@ int StereoCalibrater::SetImageListAndPair(std::vector<std::string> listFile1, st
 	{
 		if (i == listFile1.size() || j == listFile2.size())
 			break;
-		int comp = listFile1[i].compare(listFile2[j]);
+		
+		int comp = SysUtil::getFileName(listFile1[i]).compare(SysUtil::getFileName(listFile2[j]));
 		if (comp < 0)
 			i++;
 		else if (comp > 0)

@@ -85,6 +85,35 @@ private:
 		cyan = 11
 	};
 public:
+
+	/***********************************************************/
+	/*                 Replace string function                 */
+	/***********************************************************/
+	static inline std::string stringReplace(std::string strBase, std::string strSrc, std::string strDes)
+	{
+		std::string::size_type pos = 0;
+		std::string::size_type srcLen = strSrc.size();
+		std::string::size_type desLen = strDes.size();
+		pos = strBase.find(strSrc, pos);
+		while ((pos != std::string::npos))
+		{
+			strBase.replace(pos, srcLen, strDes);
+			pos = strBase.find(strSrc, (pos + desLen));
+		}
+		return strBase;
+	}
+
+	/***********************************************************/
+	/*             Get file name from path function            */
+	/***********************************************************/
+	static inline std::string getFileName(std::string path)
+	{
+		path = stringReplace(path, "\\", "/");
+		return (path.find_last_of("/") != std::string::npos) ? path.erase(0, path.find_last_of("/") + 1) : path;
+	}
+
+
+
 	/***********************************************************/
 	/*                    mkdir function                       */
 	/***********************************************************/
