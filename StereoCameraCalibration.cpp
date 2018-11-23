@@ -83,7 +83,7 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 			SysUtil::errorOutput("Unknown error in finding corners in image " + this->_pairedFiles[i].first);
 			continue;
 		}
-		SysUtil::infoOutput(SysUtil::format("Found corners (%d) in image ", pointBuf1.size()) + this->_pairedFiles[i].first);
+		//SysUtil::infoOutput(SysUtil::format("Found corners (%d) in image ", pointBuf1.size()) + this->_pairedFiles[i].first);
 
 		cv::Mat img2 = cv::imread(this->_pairedFiles[i].second);
 		found = SingleCalibrater::findChessboardCornersTimeout(img2, boardSize, pointBuf2,
@@ -103,7 +103,7 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 			SysUtil::errorOutput("Unknown error in finding corners in image " + this->_pairedFiles[i].second);
 			continue;
 		}
-		SysUtil::infoOutput(SysUtil::format("Found corners (%d) in image ", pointBuf2.size()) + this->_pairedFiles[i].second);
+		SysUtil::infoOutput(SysUtil::format("[Stereo]Found corners (%d) in image ", pointBuf2.size()) + SysUtil::getFileName(this->_pairedFiles[i].second));
 		pointList_1.push_back(pointBuf1);
 		pointList_2.push_back(pointBuf2);
 	}

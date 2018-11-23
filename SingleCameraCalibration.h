@@ -31,11 +31,12 @@ private:
 	const int flags = cv::CALIB_RATIONAL_MODEL | 
 		//cv::CALIB_THIN_PRISM_MODEL | 
 		//cv::CALIB_TILTED_MODEL | 
+		//cv::CALIB_ZERO_TANGENT_DIST |
 		cv::CALIB_FIX_K3 | 
 		cv::CALIB_FIX_K4 | 
 		cv::CALIB_FIX_K5 | 
-		cv::CALIB_FIX_ASPECT_RATIO |
-		cv::CALIB_ZERO_TANGENT_DIST;
+		cv::CALIB_FIX_K6 |
+		cv::CALIB_FIX_ASPECT_RATIO;
 
 	std::string _xmlListFile;
 	std::vector<std::string> _listFile;

@@ -24,7 +24,7 @@ private:
 	const int _flag =
 		//cv::CALIB_FIX_INTRINSIC |
 		cv::CALIB_USE_INTRINSIC_GUESS |
-		cv::CALIB_FIX_FOCAL_LENGTH |
+		//cv::CALIB_FIX_FOCAL_LENGTH |
 		cv::CALIB_FIX_ASPECT_RATIO |
 		cv::CALIB_RATIONAL_MODEL |
 		cv::CALIB_FIX_K1 |
@@ -35,7 +35,6 @@ private:
 		cv::CALIB_FIX_K6 |
 		cv::CALIB_FIX_S1_S2_S3_S4 |
 		cv::CALIB_FIX_TAUX_TAUY |
-		cv::CALIB_FIX_K5 |
 		cv::CALIB_SAME_FOCAL_LENGTH;
 		//cv::CALIB_THIN_PRISM_MODEL | 
 		//cv::CALIB_TILTED_MODEL;
