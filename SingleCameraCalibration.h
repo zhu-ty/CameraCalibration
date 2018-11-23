@@ -21,7 +21,7 @@
 #ifdef _DEBUG
 #define FIND_POINT_TIMEOUT_MS 10000
 #else
-#define FIND_POINT_TIMEOUT_MS 3000
+#define FIND_POINT_TIMEOUT_MS 2000
 #endif
 
 class SingleCalibrater

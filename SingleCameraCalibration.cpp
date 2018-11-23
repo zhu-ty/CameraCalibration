@@ -222,6 +222,7 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 	});
 #if !(defined(_WIN32) || defined(WIN32))
 	pthread_t thread_handle = t.native_handle();
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 #endif
 	t.detach();
 
