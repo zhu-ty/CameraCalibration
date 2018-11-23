@@ -73,7 +73,7 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 			SysUtil::warningOutput("Corners founding in image " + this->_pairedFiles[i].first + " over time!");
 			continue;
 		}
-		else
+		else if(found != 1)
 		{
 			SysUtil::errorOutput("Unknown error in founding corners in image " + this->_pairedFiles[i].first);
 			continue;
@@ -92,7 +92,7 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 			SysUtil::warningOutput("Corners founding in image " + this->_pairedFiles[i].second + " over time!");
 			continue;
 		}
-		else
+		else if (found != 1)
 		{
 			SysUtil::errorOutput("Unknown error in founding corners in image " + this->_pairedFiles[i].second);
 			continue;
