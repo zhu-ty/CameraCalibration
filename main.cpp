@@ -75,6 +75,11 @@ int main(int argc, char* argv[])
         }
         SinCal1.SetImageList(imageNames);
     }
+	cv::Mat cM1, dC1;
+	SinCal1.Calibrate(cM1, dC1);
+	SinCal1.SaveParams(reader.Get("CameraCalibration1", "OutputFile", "./result_left.xml"));
+
+
 	if (reader.GetBoolean("CameraCalibration2", "UseListFile", false) == true)
 		SinCal2.SetImageList(reader.Get("CameraCalibration2", "ImageList", ""));
 	else
@@ -97,17 +102,13 @@ int main(int argc, char* argv[])
 		}
 		SinCal2.SetImageList(imageNames);
 	}
-   
-
-    cv::Mat cM1,dC1;
-    SinCal1.Calibrate(cM1, dC1);
-    SinCal1.SaveParams(reader.Get("CameraCalibration1", "OutputFile", "./result_left.xml"));
 	cv::Mat cM2, dC2;
 	SinCal2.Calibrate(cM2, dC2);
 	SinCal2.SaveParams(reader.Get("CameraCalibration2", "OutputFile", "./result_right.xml"));
 
-	SteCal.SetCameraIntrinsics(cM1, dC1, cM2, dC2);
 
+
+	SteCal.SetCameraIntrinsics(cM1, dC1, cM2, dC2);
 	{
 		std::vector<std::string> imageNamesLeft, imageNamesRight;
 		std::vector<std::string> allowedExtensions = { ".jpg", ".png" ,".jpeg" };
