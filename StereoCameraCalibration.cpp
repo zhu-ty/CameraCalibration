@@ -1,6 +1,11 @@
 #include "StereoCameraCalibration.h"
 #include "SingleCameraCalibration.h"
 
+std::string StereoCalibrater::goodImageList(int x)
+{
+	return (x % 2 == 0) ? _pairedFiles[x / 2].first : _pairedFiles[x / 2].second;
+}
+
 int StereoCalibrater::SetImageListAndPair(std::vector<std::string> listFile1, std::vector<std::string> listFile2)
 {
 	int i = 0, j = 0;
@@ -70,14 +75,15 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 		}
 		else if (found == -1)
 		{
-			SysUtil::warningOutput("Corners founding in image " + this->_pairedFiles[i].first + " over time!");
+			SysUtil::warningOutput("Corners finding in image " + this->_pairedFiles[i].first + " over time!");
 			continue;
 		}
 		else if(found != 1)
 		{
-			SysUtil::errorOutput("Unknown error in founding corners in image " + this->_pairedFiles[i].first);
+			SysUtil::errorOutput("Unknown error in finding corners in image " + this->_pairedFiles[i].first);
 			continue;
 		}
+		SysUtil::infoOutput(SysUtil::format("Found corners (%d) in image ", pointBuf1.size()) + this->_pairedFiles[i].first);
 
 		cv::Mat img2 = cv::imread(this->_pairedFiles[i].second);
 		found = SingleCalibrater::findChessboardCornersTimeout(img2, boardSize, pointBuf2,
@@ -89,14 +95,15 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 		}
 		else if (found == -1)
 		{
-			SysUtil::warningOutput("Corners founding in image " + this->_pairedFiles[i].second + " over time!");
+			SysUtil::warningOutput("Corners finding in image " + this->_pairedFiles[i].second + " over time!");
 			continue;
 		}
 		else if (found != 1)
 		{
-			SysUtil::errorOutput("Unknown error in founding corners in image " + this->_pairedFiles[i].second);
+			SysUtil::errorOutput("Unknown error in finding corners in image " + this->_pairedFiles[i].second);
 			continue;
 		}
+		SysUtil::infoOutput(SysUtil::format("Found corners (%d) in image ", pointBuf2.size()) + this->_pairedFiles[i].second);
 		pointList_1.push_back(pointBuf1);
 		pointList_2.push_back(pointBuf2);
 	}
@@ -119,7 +126,8 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 		_cameraIntrinsics[0]._cameraMatrix, _cameraIntrinsics[0]._distCoeffs,
 		_cameraIntrinsics[1]._cameraMatrix, _cameraIntrinsics[1]._distCoeffs,
 		_imageSize, _R, _T, _E, _F,
-		_flag);
+		_flag,
+		cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 1000, 1e-5));
 	SysUtil::infoOutput(SysUtil::format("StereoCalibrater::Calibrate Re-projection error reported by stereoCalibrate: %f", rms));
 
 	// CALIBRATION QUALITY CHECK
@@ -152,13 +160,10 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 	}
 	SysUtil::infoOutput(SysUtil::format("StereoCalibrater::Calibrate Average epipolar err = %f", err / npoints));
 
-	cv::Rect validRoi[2];
-	
-
 	cv::stereoRectify(_cameraIntrinsics[0]._cameraMatrix, _cameraIntrinsics[0]._distCoeffs,
 		_cameraIntrinsics[1]._cameraMatrix, _cameraIntrinsics[1]._distCoeffs,
 		_imageSize, _R, _T, _R1, _R2, _P1, _P2, _Q,
-		cv::CALIB_ZERO_DISPARITY, 1, _imageSize, &validRoi[0], &validRoi[1]);
+		cv::CALIB_ZERO_DISPARITY, 1, _imageSize, &_validRoi[0], &_validRoi[1]);
 
 	R = _R;
 	T = _T;
@@ -220,7 +225,7 @@ int StereoCalibrater::SaveParams(std::string resultFile, std::string rectifyData
 	else
 		SysUtil::errorOutput(DEBUG_STRING + "Error: can not save the intrinsic parameters");
 
-	fs.open(rectifyDataDir + "extrinsics.yml", cv::FileStorage::WRITE);
+	fs.open(rectifyDataDir + "/extrinsics.yml", cv::FileStorage::WRITE);
 	if (fs.isOpened())
 	{
 		fs << "R" << _R << "T" << _T << "R1" << _R1 << "R2" << _R2 << "P1" << _P1 << "P2" << _P2 << "Q" << _Q;
@@ -231,3 +236,61 @@ int StereoCalibrater::SaveParams(std::string resultFile, std::string rectifyData
 
 	return 0;
 }
+
+
+int StereoCalibrater::ShowResults()
+{
+	bool isVerticalStereo = fabs(_P2.at<double>(1, 3)) > fabs(_P2.at<double>(0, 3));
+	cv::Mat rmap[2][2];
+	//Precompute maps for cv::remap()
+	cv::initUndistortRectifyMap(_cameraIntrinsics[0]._cameraMatrix, _cameraIntrinsics[0]._distCoeffs, _R1, _P1, _imageSize, CV_16SC2, rmap[0][0], rmap[0][1]);
+	cv::initUndistortRectifyMap(_cameraIntrinsics[1]._cameraMatrix, _cameraIntrinsics[1]._distCoeffs, _R2, _P2, _imageSize, CV_16SC2, rmap[1][0], rmap[1][1]);
+
+	cv::Mat canvas;
+	double sf;
+	int w, h;
+	if (!isVerticalStereo)
+	{
+		sf = 600. / MAX(_imageSize.width, _imageSize.height);
+		w = cvRound(_imageSize.width*sf);
+		h = cvRound(_imageSize.height*sf);
+		canvas.create(h, w * 2, CV_8UC3);
+	}
+	else
+	{
+		sf = 300. / MAX(_imageSize.width, _imageSize.height);
+		w = cvRound(_imageSize.width*sf);
+		h = cvRound(_imageSize.height*sf);
+		canvas.create(h * 2, w, CV_8UC3);
+	}
+
+	for (int i = 0; i < _pairedFiles.size(); i++)
+	{
+		for (int k = 0; k < 2; k++)
+		{
+			cv::Mat img = cv::imread(goodImageList(i * 2 + k), 0), rimg, cimg;
+			cv::remap(img, rimg, rmap[k][0], rmap[k][1], cv::INTER_LINEAR);
+			cv::cvtColor(rimg, cimg, cv::COLOR_GRAY2BGR);
+			cv::Mat canvasPart = !isVerticalStereo ? canvas(cv::Rect(w*k, 0, w, h)) : canvas(cv::Rect(0, h*k, w, h));
+			cv::resize(cimg, canvasPart, canvasPart.size(), 0, 0, cv::INTER_AREA);
+			cv::Rect vroi(cvRound(_validRoi[k].x*sf), cvRound(_validRoi[k].y*sf),
+				cvRound(_validRoi[k].width*sf), cvRound(_validRoi[k].height*sf));
+			cv::rectangle(canvasPart, vroi, cv::Scalar(0, 0, 255), 3, 8);
+		}
+
+		if (!isVerticalStereo)
+			for (int j = 0; j < canvas.rows; j += 16)
+				line(canvas, cv::Point(0, j), cv::Point(canvas.cols, j), cv::Scalar(0, 255, 0), 1, 8);
+		else
+			for (int j = 0; j < canvas.cols; j += 16)
+				line(canvas, cv::Point(j, 0), cv::Point(j, canvas.rows), cv::Scalar(0, 255, 0), 1, 8);
+		imshow("rectified", canvas);
+		char c = (char)cv::waitKey();
+		if (c == 27 || c == 'q' || c == 'Q')
+			break;
+	}
+	return 0;
+}
+
+
+//TODO View result

@@ -21,11 +21,29 @@
 class StereoCalibrater
 {
 private:
-	const int _flag = cv::CALIB_FIX_INTRINSIC | cv::CALIB_USE_INTRINSIC_GUESS ;
+	const int _flag =
+		//cv::CALIB_FIX_INTRINSIC |
+		cv::CALIB_USE_INTRINSIC_GUESS |
+		cv::CALIB_FIX_FOCAL_LENGTH |
+		cv::CALIB_FIX_ASPECT_RATIO |
+		cv::CALIB_RATIONAL_MODEL |
+		cv::CALIB_FIX_K1 |
+		cv::CALIB_FIX_K2 |
+		cv::CALIB_FIX_K3 |
+		cv::CALIB_FIX_K4 |
+		cv::CALIB_FIX_K5 |
+		cv::CALIB_FIX_K6 |
+		cv::CALIB_FIX_S1_S2_S3_S4 |
+		cv::CALIB_FIX_TAUX_TAUY |
+		cv::CALIB_FIX_K5 |
+		cv::CALIB_SAME_FOCAL_LENGTH;
+		//cv::CALIB_THIN_PRISM_MODEL | 
+		//cv::CALIB_TILTED_MODEL;
 	std::vector<std::pair<std::string, std::string>> _pairedFiles;
 	int _cornerWidth, _cornerHeight;
 	double _squareSize;
 	cv::Size _imageSize;
+	cv::Rect _validRoi[2];
 
 	struct
 	{
@@ -33,6 +51,8 @@ private:
 	} _cameraIntrinsics[2];
 
 	cv::Mat _R, _T, _R1, _R2, _P1, _P2, _Q;
+private:
+	std::string goodImageList(int x);
 public:
 	//Pair 2 img lists, file with same name will be paired
 	int SetImageListAndPair(std::vector<std::string> listFile1, std::vector<std::string> listFile2);
@@ -44,6 +64,8 @@ public:
 	int Calibrate(cv::Mat &R, cv::Mat &T, cv::Mat &R1, cv::Mat &R2, cv::Mat &P1, cv::Mat &P2, cv::Mat &Q);
 
 	int SaveParams(std::string resultFile, std::string rectifyDataDir);
+
+	int ShowResults();
 };
 
 #endif //__CAMERA_CALIBRATION_STEREO__

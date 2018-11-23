@@ -98,9 +98,9 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 		else if (found == 0)
 			SysUtil::warningOutput("Corners not found in image " + fileList[i]);
 		else if (found == -1)
-			SysUtil::warningOutput("Corners founding in image " + fileList[i] + " over time!");
+			SysUtil::warningOutput("Corners finding in image " + fileList[i] + " over time!");
 		else
-			SysUtil::errorOutput("Unknown error in founding corners in image " + fileList[i]);
+			SysUtil::errorOutput("Unknown error in finding corners in image " + fileList[i]);
 
 	}
 	if (_imagePoints.size() <= 0)
@@ -126,7 +126,7 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 	double rms;
 
 	//TODO: check these flags.
-	rms = cv::calibrateCamera(objectPoints, _imagePoints, _imageSize, _cameraMatrix, _distCoeffs, rvecs, tvecs, flags);
+	rms = cv::calibrateCamera(objectPoints, _imagePoints, _imageSize, _cameraMatrix, _distCoeffs, rvecs, tvecs, flags, cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 1000, 1e-5));
 	SysUtil::infoOutput(SysUtil::format("SingleCalibrater::Calibrate Re-projection error reported by calibrateCamera: %f", rms));
 	if (!(cv::checkRange(_cameraMatrix) && cv::checkRange(_distCoeffs)))
 	{

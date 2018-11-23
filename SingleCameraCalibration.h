@@ -28,7 +28,14 @@ class SingleCalibrater
 {
 private:
 	//const int flags = cv::CALIB_USE_INTRINSIC_GUESS | cv::CALIB_FIX_ASPECT_RATIO | cv::CALIB_TILTED_MODEL | cv::CALIB_FIX_K3 | cv::CALIB_FIX_K4 | cv::CALIB_FIX_K5;
-	const int flags = cv::CALIB_RATIONAL_MODEL | cv::CALIB_THIN_PRISM_MODEL | cv::CALIB_TILTED_MODEL;
+	const int flags = cv::CALIB_RATIONAL_MODEL | 
+		//cv::CALIB_THIN_PRISM_MODEL | 
+		//cv::CALIB_TILTED_MODEL | 
+		cv::CALIB_FIX_K3 | 
+		cv::CALIB_FIX_K4 | 
+		cv::CALIB_FIX_K5 | 
+		cv::CALIB_FIX_ASPECT_RATIO |
+		cv::CALIB_ZERO_TANGENT_DIST;
 
 	std::string _xmlListFile;
 	std::vector<std::string> _listFile;

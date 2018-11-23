@@ -149,8 +149,8 @@ int main(int argc, char* argv[])
 		reader.Get("StereoCalibration", "OutputFile", "./result_stereo.xml"),
 		reader.Get("StereoCalibration", "OutPutParamDir", "./param/")
 	);
-
+	SteCal.ShowResults();
     SysUtil::infoOutput("done!");
-
+	
     return 0;
 }
