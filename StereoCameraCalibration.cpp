@@ -103,7 +103,7 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 			SysUtil::errorOutput("Unknown error in finding corners in image " + this->_pairedFiles[i].second);
 			continue;
 		}
-		SysUtil::infoOutput(SysUtil::format("[Stereo]Found corners (%d) in image ", pointBuf2.size()) + SysUtil::getFileName(this->_pairedFiles[i].second));
+		SysUtil::infoOutput(SysUtil::format("[Stereo] Found corners (%d) in image ", pointBuf2.size()) + SysUtil::getFileName(this->_pairedFiles[i].second));
 		pointList_1.push_back(pointBuf1);
 		pointList_2.push_back(pointBuf2);
 	}
@@ -145,15 +145,17 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 		for (int k = 0; k < 2; k++)
 		{
 			imgpt[k] = cv::Mat((k == 0) ? (pointList_1[i]) : (pointList_2[i]));
-			undistortPoints(imgpt[k], imgpt[k], _cameraIntrinsics[k]._cameraMatrix, _cameraIntrinsics[k]._distCoeffs);
+			cv::undistortPoints(imgpt[k], imgpt[k],
+				_cameraIntrinsics[k]._cameraMatrix, _cameraIntrinsics[k]._distCoeffs,
+				cv::Mat(), _cameraIntrinsics[k]._cameraMatrix);
 			computeCorrespondEpilines(imgpt[k], k + 1, _F, lines[k]);
 		}
 		for (int j = 0; j < npt; j++)
 		{
 			double errij = fabs(pointList_1[i][j].x*lines[1][j][0] +
-				pointList_1[i][j].y*lines[1][j][1] + lines[1][j][2]) +
-				fabs(pointList_2[i][j].x*lines[0][j][0] +
-					pointList_2[i][j].y*lines[0][j][1] + lines[0][j][2]);
+								pointList_1[i][j].y*lines[1][j][1] + lines[1][j][2]) +
+						   fabs(pointList_2[i][j].x*lines[0][j][0] +
+								pointList_2[i][j].y*lines[0][j][1] + lines[0][j][2]);
 			err += errij;
 		}
 		npoints += npt;
@@ -191,18 +193,40 @@ int StereoCalibrater::SaveParams(std::string resultFile, std::string rectifyData
 	{
 		std::stringstream flagsStringStream;
 		flagsStringStream << "flags:"
-			<< (_flag & cv::CALIB_USE_INTRINSIC_GUESS ? " +use_intrinsic_guess" : "")
-			<< (_flag & cv::CALIB_FIX_ASPECT_RATIO ? " +fix_aspectRatio" : "")
-			<< (_flag & cv::CALIB_FIX_PRINCIPAL_POINT ? " +fix_principal_point" : "")
-			<< (_flag & cv::CALIB_ZERO_TANGENT_DIST ? " +zero_tangent_dist" : "")
-			<< (_flag & cv::CALIB_TILTED_MODEL ? " +calib_tilted_model" : "")
-			<< (_flag & cv::CALIB_FIX_INTRINSIC ? " +CALIB_FIX_INTRINSIC" : "")
-			<< (_flag & cv::CALIB_SAME_FOCAL_LENGTH ? " +CALIB_SAME_FOCAL_LENGTH" : "")
-			<< (_flag & cv::CALIB_FIX_K1 ? " +fix_k1" : "")
-			<< (_flag & cv::CALIB_FIX_K2 ? " +fix_k2" : "")
-			<< (_flag & cv::CALIB_FIX_K3 ? " +fix_k3" : "")
-			<< (_flag & cv::CALIB_FIX_K4 ? " +fix_k4" : "")
-			<< (_flag & cv::CALIB_FIX_K5 ? " +fix_k5" : "");
+			//<< (_flag & cv::CALIB_USE_INTRINSIC_GUESS ? " +use_intrinsic_guess\n" : "")
+			//<< (_flag & cv::CALIB_FIX_ASPECT_RATIO ? " +fix_aspectRatio\n" : "")
+			//<< (_flag & cv::CALIB_FIX_PRINCIPAL_POINT ? " +fix_principal_point\n" : "")
+			//<< (_flag & cv::CALIB_ZERO_TANGENT_DIST ? " +zero_tangent_dist\n" : "")
+			//<< (_flag & cv::CALIB_TILTED_MODEL ? " +calib_tilted_model\n" : "")
+			//<< (_flag & cv::CALIB_FIX_INTRINSIC ? " +CALIB_FIX_INTRINSIC\n" : "")
+			//<< (_flag & cv::CALIB_SAME_FOCAL_LENGTH ? " +CALIB_SAME_FOCAL_LENGTH\n" : "")
+			//<< (_flag & cv::CALIB_FIX_K1 ? " +fix_k1\n" : "")
+			//<< (_flag & cv::CALIB_FIX_K2 ? " +fix_k2\n" : "")
+			//<< (_flag & cv::CALIB_FIX_K3 ? " +fix_k3\n" : "")
+			//<< (_flag & cv::CALIB_FIX_K4 ? " +fix_k4\n" : "")
+			//<< (_flag & cv::CALIB_FIX_K5 ? " +fix_k5\n" : "")
+
+			<< (_flag & cv::CALIB_USE_INTRINSIC_GUESS ? " +CALIB_USE_INTRINSIC_GUESS\n" : "")
+			<< (_flag & cv::CALIB_FIX_ASPECT_RATIO ? " +CALIB_FIX_ASPECT_RATIO\n" : "")
+			<< (_flag & cv::CALIB_FIX_PRINCIPAL_POINT ? " +CALIB_FIX_PRINCIPAL_POINT\n" : "")
+			<< (_flag & cv::CALIB_ZERO_TANGENT_DIST ? " +CALIB_ZERO_TANGENT_DIST\n" : "")
+			<< (_flag & cv::CALIB_FIX_FOCAL_LENGTH ? " +CALIB_FIX_FOCAL_LENGTH\n" : "")
+			<< (_flag & cv::CALIB_FIX_K1 ? " +CALIB_FIX_K1\n" : "")
+			<< (_flag & cv::CALIB_FIX_K2 ? " +CALIB_FIX_K2\n" : "")
+			<< (_flag & cv::CALIB_FIX_K3 ? " +CALIB_FIX_K3\n" : "")
+			<< (_flag & cv::CALIB_FIX_K4 ? " +CALIB_FIX_K4\n" : "")
+			<< (_flag & cv::CALIB_FIX_K5 ? " +CALIB_FIX_K5\n" : "")
+			<< (_flag & cv::CALIB_FIX_K6 ? " +CALIB_FIX_K6\n" : "")
+			<< (_flag & cv::CALIB_RATIONAL_MODEL ? " +CALIB_RATIONAL_MODEL\n" : "")
+			<< (_flag & cv::CALIB_THIN_PRISM_MODEL ? " +CALIB_THIN_PRISM_MODEL\n" : "")
+			<< (_flag & cv::CALIB_FIX_S1_S2_S3_S4 ? " +CALIB_FIX_S1_S2_S3_S4\n" : "")
+			<< (_flag & cv::CALIB_TILTED_MODEL ? " +CALIB_TILTED_MODEL\n" : "")
+			<< (_flag & cv::CALIB_FIX_TAUX_TAUY ? " +CALIB_FIX_TAUX_TAUY\n" : "")
+			<< (_flag & cv::CALIB_USE_QR ? " +CALIB_USE_QR\n" : "")
+			<< (_flag & cv::CALIB_FIX_TANGENT_DIST ? " +CALIB_FIX_TANGENT_DIST\n" : "")
+			<< (_flag & cv::CALIB_FIX_INTRINSIC ? " +CALIB_FIX_INTRINSIC\n" : "")
+			<< (_flag & cv::CALIB_SAME_FOCAL_LENGTH ? " +CALIB_SAME_FOCAL_LENGTH\n" : "");
+
 		fs.writeComment(flagsStringStream.str());
 	}
 	fs << "flags" << _flag;
@@ -210,6 +234,14 @@ int StereoCalibrater::SaveParams(std::string resultFile, std::string rectifyData
 	fs << "distortion_coefficients_1" << _cameraIntrinsics[0]._distCoeffs;
 	fs << "camera_matrix_2" << _cameraIntrinsics[1]._cameraMatrix;
 	fs << "distortion_coefficients_2" << _cameraIntrinsics[1]._distCoeffs;
+
+	fs << "R" << _R;
+	fs << "T" << _T;
+	fs << "R1" << _R1;
+	fs << "R2" << _R2;
+	fs << "P1" << _P1;
+	fs << "P2" << _P2;
+	fs << "Q" << _Q;
 
 	fs.release();
 

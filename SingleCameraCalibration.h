@@ -32,6 +32,7 @@ private:
 		//cv::CALIB_THIN_PRISM_MODEL | 
 		//cv::CALIB_TILTED_MODEL | 
 		//cv::CALIB_ZERO_TANGENT_DIST |
+		cv::CALIB_FIX_PRINCIPAL_POINT |
 		cv::CALIB_FIX_K3 | 
 		cv::CALIB_FIX_K4 | 
 		cv::CALIB_FIX_K5 | 

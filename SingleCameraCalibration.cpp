@@ -115,7 +115,7 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 	double totalAvgErr = 0;
 
 	_cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
-	//_cameraMatrix.at<double>(0, 0) = ASPECT_RATIO; //TODO: now only 4:3 camera
+	//_cameraMatrix.at<double>(0, 0) = ASPECT_RATIO; 
 	_distCoeffs = cv::Mat::zeros(14, 1, CV_64F);
 
 	std::vector<std::vector<cv::Point3f> > objectPoints(1);
@@ -158,17 +158,42 @@ int SingleCalibrater::SaveParams(std::string file)
 	if (flags)
 	{
 		std::stringstream flagsStringStream;
+		int _flag = flags;
 		flagsStringStream << "flags:"
-			<< (flags & cv::CALIB_USE_INTRINSIC_GUESS ? " +use_intrinsic_guess" : "")
-			<< (flags & cv::CALIB_FIX_ASPECT_RATIO ? " +fix_aspectRatio" : "")
-			<< (flags & cv::CALIB_FIX_PRINCIPAL_POINT ? " +fix_principal_point" : "")
-			<< (flags & cv::CALIB_ZERO_TANGENT_DIST ? " +zero_tangent_dist" : "")
-			<< (flags & cv::CALIB_TILTED_MODEL ? " +calib_tilted_model" : "")
-			<< (flags & cv::CALIB_FIX_K1 ? " +fix_k1" : "")
-			<< (flags & cv::CALIB_FIX_K2 ? " +fix_k2" : "")
-			<< (flags & cv::CALIB_FIX_K3 ? " +fix_k3" : "")
-			<< (flags & cv::CALIB_FIX_K4 ? " +fix_k4" : "")
-			<< (flags & cv::CALIB_FIX_K5 ? " +fix_k5" : "");
+			//<< (_flag & cv::CALIB_USE_INTRINSIC_GUESS ? " +use_intrinsic_guess\n" : "")
+			//<< (_flag & cv::CALIB_FIX_ASPECT_RATIO ? " +fix_aspectRatio\n" : "")
+			//<< (_flag & cv::CALIB_FIX_PRINCIPAL_POINT ? " +fix_principal_point\n" : "")
+			//<< (_flag & cv::CALIB_ZERO_TANGENT_DIST ? " +zero_tangent_dist\n" : "")
+			//<< (_flag & cv::CALIB_TILTED_MODEL ? " +calib_tilted_model\n" : "")
+			//<< (_flag & cv::CALIB_FIX_INTRINSIC ? " +CALIB_FIX_INTRINSIC\n" : "")
+			//<< (_flag & cv::CALIB_SAME_FOCAL_LENGTH ? " +CALIB_SAME_FOCAL_LENGTH\n" : "")
+			//<< (_flag & cv::CALIB_FIX_K1 ? " +fix_k1\n" : "")
+			//<< (_flag & cv::CALIB_FIX_K2 ? " +fix_k2\n" : "")
+			//<< (_flag & cv::CALIB_FIX_K3 ? " +fix_k3\n" : "")
+			//<< (_flag & cv::CALIB_FIX_K4 ? " +fix_k4\n" : "")
+			//<< (_flag & cv::CALIB_FIX_K5 ? " +fix_k5\n" : "")
+
+			<< (_flag & cv::CALIB_USE_INTRINSIC_GUESS ? " +CALIB_USE_INTRINSIC_GUESS\n" : "")
+			<< (_flag & cv::CALIB_FIX_ASPECT_RATIO ? " +CALIB_FIX_ASPECT_RATIO\n" : "")
+			<< (_flag & cv::CALIB_FIX_PRINCIPAL_POINT ? " +CALIB_FIX_PRINCIPAL_POINT\n" : "")
+			<< (_flag & cv::CALIB_ZERO_TANGENT_DIST ? " +CALIB_ZERO_TANGENT_DIST\n" : "")
+			<< (_flag & cv::CALIB_FIX_FOCAL_LENGTH ? " +CALIB_FIX_FOCAL_LENGTH\n" : "")
+			<< (_flag & cv::CALIB_FIX_K1 ? " +CALIB_FIX_K1\n" : "")
+			<< (_flag & cv::CALIB_FIX_K2 ? " +CALIB_FIX_K2\n" : "")
+			<< (_flag & cv::CALIB_FIX_K3 ? " +CALIB_FIX_K3\n" : "")
+			<< (_flag & cv::CALIB_FIX_K4 ? " +CALIB_FIX_K4\n" : "")
+			<< (_flag & cv::CALIB_FIX_K5 ? " +CALIB_FIX_K5\n" : "")
+			<< (_flag & cv::CALIB_FIX_K6 ? " +CALIB_FIX_K6\n" : "")
+			<< (_flag & cv::CALIB_RATIONAL_MODEL ? " +CALIB_RATIONAL_MODEL\n" : "")
+			<< (_flag & cv::CALIB_THIN_PRISM_MODEL ? " +CALIB_THIN_PRISM_MODEL\n" : "")
+			<< (_flag & cv::CALIB_FIX_S1_S2_S3_S4 ? " +CALIB_FIX_S1_S2_S3_S4\n" : "")
+			<< (_flag & cv::CALIB_TILTED_MODEL ? " +CALIB_TILTED_MODEL\n" : "")
+			<< (_flag & cv::CALIB_FIX_TAUX_TAUY ? " +CALIB_FIX_TAUX_TAUY\n" : "")
+			<< (_flag & cv::CALIB_USE_QR ? " +CALIB_USE_QR\n" : "")
+			<< (_flag & cv::CALIB_FIX_TANGENT_DIST ? " +CALIB_FIX_TANGENT_DIST\n" : "")
+			<< (_flag & cv::CALIB_FIX_INTRINSIC ? " +CALIB_FIX_INTRINSIC\n" : "")
+			<< (_flag & cv::CALIB_SAME_FOCAL_LENGTH ? " +CALIB_SAME_FOCAL_LENGTH\n" : "");
+
 		fs.writeComment(flagsStringStream.str());
 	}
 	fs << "flags" << flags;
