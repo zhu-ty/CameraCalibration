@@ -21,6 +21,9 @@
 class StereoCalibrater
 {
 private:
+	/*
+	https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga91018d80e2a93ade37539f01e6f07de5
+	*/
 	const int _flag =
 		//cv::CALIB_FIX_INTRINSIC |
 		cv::CALIB_USE_INTRINSIC_GUESS |

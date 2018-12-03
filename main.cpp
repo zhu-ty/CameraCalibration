@@ -16,6 +16,21 @@ int main(int argc, char* argv[])
 	//int c2 = a1.compare(a10); //< 0
 	//int c3 = a2.compare(a10); //< 0
 
+	//auto t1 = clock();
+	//auto tt1 = SysUtil::getCurrentTimeMicroSecond();
+	//std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+	//auto t2 = clock();
+	//auto tt2 = SysUtil::getCurrentTimeMicroSecond();
+	//SysUtil::infoOutput(SysUtil::format("TIME_PASSED = %f", t2 - t1));
+	//SysUtil::infoOutput(SysUtil::format("TIME_PASSED2 = %ld", tt2 - tt1));
+	//system("pause");
+
+
+
+
+
+
+
     std::string configFile = "./CCConfig.ini";
     if(argc > 1)
     {
@@ -27,11 +42,6 @@ int main(int argc, char* argv[])
 		SysUtil::errorOutput(std::string("main Can't load :") + configFile);
 		return -1;
 	}
-
-
-
-
-
 
 
     SingleCalibrater SinCal1, SinCal2;

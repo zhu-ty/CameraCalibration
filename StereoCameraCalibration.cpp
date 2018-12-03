@@ -310,6 +310,7 @@ int StereoCalibrater::ShowResults()
 			cv::rectangle(canvasPart, vroi, cv::Scalar(0, 0, 255), 3, 8);
 		}
 
+
 		if (!isVerticalStereo)
 			for (int j = 0; j < canvas.rows; j += 16)
 				line(canvas, cv::Point(0, j), cv::Point(canvas.cols, j), cv::Scalar(0, 255, 0), 1, 8);

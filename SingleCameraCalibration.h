@@ -28,6 +28,9 @@ class SingleCalibrater
 {
 private:
 	//const int flags = cv::CALIB_USE_INTRINSIC_GUESS | cv::CALIB_FIX_ASPECT_RATIO | cv::CALIB_TILTED_MODEL | cv::CALIB_FIX_K3 | cv::CALIB_FIX_K4 | cv::CALIB_FIX_K5;
+	/*
+	https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga3207604e4b1a1758aa66acb6ed5aa65d
+	*/
 	const int flags = cv::CALIB_RATIONAL_MODEL | 
 		//cv::CALIB_THIN_PRISM_MODEL | 
 		//cv::CALIB_TILTED_MODEL | 

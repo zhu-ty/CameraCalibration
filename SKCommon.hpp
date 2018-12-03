@@ -58,8 +58,6 @@
 #else
 #define DELTA_EPOCH_IN_MICROSECS 11644473600000000ULL
 #endif
-
-
 #endif
 
 #define DEBUG_STRING std::string("file: " +   \
