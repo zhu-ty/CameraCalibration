@@ -217,6 +217,8 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 	bool running = true;
 #if defined(_WIN32) || defined(WIN32)
 	int thread_id;
+#else
+	bool can_detach = false;
 #endif
 	std::thread t([&]()
 	{
@@ -227,6 +229,7 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 #else
 		int *x;
 		pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,x);
+		can_detach = true;
 #endif
 
 		bool found = cv::findChessboardCorners(img, boardSize, tmp_out_pointList, flag);
@@ -247,7 +250,8 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 	});
 #if !(defined(_WIN32) || defined(WIN32))
 	pthread_t thread_handle = t.native_handle();
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	while(!can_detach)
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 #endif
 	t.detach();
 
