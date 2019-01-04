@@ -51,15 +51,37 @@ int main(int argc, char* argv[])
 		reader.GetInteger("CameraCalibration", "BoardHeight", 0),
 		reader.GetReal("CameraCalibration", "BoardSize", 0)
 	);
+	SinCal1.SetVignettingMat(
+		reader.Get("CameraCalibration1", "Vignetting", "")
+	);
+	SinCal1.SetRedSpot(
+		reader.GetBoolean("CameraCalibration", "RedSpot", false)
+	);
+
 	SinCal2.SetBoardSize(
 		reader.GetInteger("CameraCalibration", "BoardWidth", 0),
 		reader.GetInteger("CameraCalibration", "BoardHeight", 0),
 		reader.GetReal("CameraCalibration", "BoardSize", 0)
 	);
+	SinCal2.SetVignettingMat(
+		reader.Get("CameraCalibration2", "Vignetting", "")
+	);
+	SinCal2.SetRedSpot(
+		reader.GetBoolean("CameraCalibration", "RedSpot", false)
+	);
+
+
 	SteCal.SetBoardSize(
 		reader.GetInteger("CameraCalibration", "BoardWidth", 0),
 		reader.GetInteger("CameraCalibration", "BoardHeight", 0),
 		reader.GetReal("CameraCalibration", "BoardSize", 0)
+	);
+	SteCal.SetVignettingMat(
+		reader.Get("CameraCalibration1", "Vignetting", ""),
+		reader.Get("CameraCalibration2", "Vignetting", "")
+	);
+	SteCal.SetRedSpot(
+		reader.GetBoolean("CameraCalibration", "RedSpot", false)
 	);
 
     if(reader.GetBoolean("CameraCalibration1","UseListFile",false) == true)

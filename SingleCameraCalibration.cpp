@@ -18,6 +18,19 @@ int SingleCalibrater::readStringList(const std::string & filename, std::vector<s
 	return 0;
 }
 
+int SingleCalibrater::SetVignettingMat(std::string & vigMat)
+{
+	if (vigMat != "")
+		_vignetting = cv::imread(vigMat, cv::IMREAD_UNCHANGED);
+	return 0;
+}
+
+int SingleCalibrater::SetRedSpot(bool redSpot)
+{
+	_red = redSpot;
+	return 0;
+}
+
 int SingleCalibrater::SetImageList(std::string xmlListFile)
 {
 	this->_xmlListFile = xmlListFile;
@@ -68,6 +81,13 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 	{
 		std::vector<cv::Point2f> pointBuf;
 		cv::Mat img = cv::imread(fileList[i]);
+
+
+
+
+
+
+
 		//bool found = cv::findChessboardCorners(img, boardSize, pointBuf,
 		//	cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK);
 		//if (found)
@@ -89,7 +109,8 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 		//	SysUtil::warningOutput("Corners not found in image " + fileList[i]);
 		//}
 		int found = SingleCalibrater::findChessboardCornersTimeout(img, boardSize, pointBuf,
-			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK, FIND_POINT_TIMEOUT_MS);
+			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK, FIND_POINT_TIMEOUT_MS,
+			_vignetting, _red);
 		if (found == 1)
 		{
 			SysUtil::infoOutput(SysUtil::format("Found corners (%d) in image ", pointBuf.size()) + fileList[i]);
@@ -206,13 +227,101 @@ int SingleCalibrater::SaveParams(std::string file)
 
 
 
-int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &boardSize, std::vector<cv::Point2f> &out_pointList, int flag, int timeoutMs)
+int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &boardSize, std::vector<cv::Point2f> &out_pointList, int flag, int timeoutMs,
+	cv::Mat &_vignetting, bool findRedROI)
 {
+	//pre
+	cv::Rect finalRect(0, 0, img.cols, img.rows);
+	if (findRedROI)
+	{
+		struct Contour
+		{
+			double area;
+			cv::Point center;
+			cv::Rect bRect;
+			std::vector<cv::Point> data;
+			Contour(std::vector<cv::Point> _data)
+			{
+				data = _data;
+				area = cv::contourArea(data);
+				bRect = cv::boundingRect(data);
+				center.x = bRect.x + bRect.width / 2;
+				center.y = bRect.y + bRect.height / 2;
+			}
+			static bool compBigger(const Contour &a, const Contour &b)
+			{
+				return a.area > b.area;
+			}
+		};
+		cv::Mat lab, arrayLab[3], A;
+
+		//{
+		//	cv::Mat hsv, hsv_array[3];
+		//	cv::split(img, hsv_array);
+		//	cv::Mat s3;
+		//	hsv_array[1].convertTo(s3, CV_8UC1, 1.16);
+		//	hsv_array[1] = s3;
+		//	cv::merge(hsv_array, 3, img);
+
+		//	
+		//	cv::cvtColor(img, hsv, cv::COLOR_BGR2HSV);
+		//	cv::split(hsv, hsv_array);
+		//	cv::Mat s2;
+		//	hsv_array[1].convertTo(s2, CV_8UC1, 5);
+		//	hsv_array[1] = s2;
+		//	cv::merge(hsv_array, 3, hsv);
+		//	cv::cvtColor(hsv, img, cv::COLOR_HSV2BGR);
+
+		//	
+		//}
+
+
+		cv::cvtColor(img, lab, cv::COLOR_BGR2Lab);
+		cv::split(lab, arrayLab);
+
+		cv::equalizeHist(arrayLab[1], arrayLab[1]);
+		cv::threshold(arrayLab[1], A, 254, 255, cv::THRESH_BINARY);
+		cv::Mat Element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+		cv::erode(A, A, Element);
+
+		//cv::threshold(arrayLab[1], A, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+		std::vector<std::vector<cv::Point>> contours; // Vector for storing contour
+		std::vector<cv::Point> max4c[4];
+		std::vector<cv::Vec4i> hierarchy;
+		cv::findContours(A, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+		std::vector<Contour> cs;
+		for (int j = 0; j < contours.size(); j++)
+		{
+			Contour c(contours[j]);
+			if(c.area > FIND_POINT_MIN_AREA_REDDOT)
+				cs.push_back(c);
+		}
+		std::sort(cs.begin(), cs.end(), Contour::compBigger);
+		std::vector<cv::Point> finalRectPt(4);
+		for (int j = 0; j < 4; j++)
+		{
+			finalRectPt[j] = cs[j].center;
+		}
+		finalRect = cv::boundingRect(finalRectPt);
+	}
+	cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+	if (!_vignetting.empty() && _vignetting.size == img.size)
+	{
+		cv::Mat fimg;
+		img.convertTo(fimg, CV_32FC1);
+		img = fimg.mul(_vignetting);
+		img.convertTo(img, CV_8UC1);
+	}
+	if (findRedROI)
+	{
+		cv::Mat tmp;
+		img(finalRect).copyTo(tmp);
+		img = tmp;
+	}
+
+
+
 	std::vector<cv::Point2f> tmp_out_pointList;
-
-
-	//std::mutex m;
-	//std::condition_variable cv;
 	bool retValue;
 	bool running = true;
 #if defined(_WIN32) || defined(WIN32)
@@ -231,12 +340,12 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 		pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,x);
 		can_detach = true;
 #endif
-
 		bool found = cv::findChessboardCorners(img, boardSize, tmp_out_pointList, flag);
 		if (found)
 		{
-			cv::Mat imgGray;
-			cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
+			cv::Mat imgGray = img;
+			//cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
+
 			cv::cornerSubPix(imgGray, tmp_out_pointList, cv::Size(11, 11), cv::Size(-1, -1),
 				cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.1));
 			retValue = true;
@@ -290,7 +399,17 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 		else
 		{
 			if (retValue)
+			{
 				out_pointList = tmp_out_pointList;
+				if (findRedROI)
+				{
+					for (int j = 0; j < out_pointList.size(); j++)
+					{
+						out_pointList[j].x += finalRect.x;
+						out_pointList[j].y += finalRect.y;
+					}
+				}
+			}
 			return (retValue) ? 1 : 0;
 		}
 	}

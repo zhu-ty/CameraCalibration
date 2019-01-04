@@ -6,6 +6,21 @@ std::string StereoCalibrater::goodImageList(int x)
 	return (x % 2 == 0) ? _pairedFiles[x / 2].first : _pairedFiles[x / 2].second;
 }
 
+int StereoCalibrater::SetVignettingMat(std::string& vigMatLeft, std::string& vigMatRight)
+{
+	if (vigMatLeft != "")
+		_vignettingL = cv::imread(vigMatLeft, cv::IMREAD_UNCHANGED);
+	if (vigMatRight != "")
+		_vignettingR = cv::imread(vigMatRight, cv::IMREAD_UNCHANGED);
+	return 0;
+}
+
+int StereoCalibrater::SetRedSpot(bool redSpot)
+{
+	_red = redSpot;
+	return 0;
+}
+
 int StereoCalibrater::SetImageListAndPair(std::vector<std::string> listFile1, std::vector<std::string> listFile2)
 {
 	int i = 0, j = 0;
@@ -67,7 +82,8 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 		std::vector<cv::Point2f> pointBuf1, pointBuf2;
 		cv::Mat img1 = cv::imread(this->_pairedFiles[i].first);
 		int found = SingleCalibrater::findChessboardCornersTimeout(img1, boardSize, pointBuf1,
-			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK, FIND_POINT_TIMEOUT_MS);
+			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK, FIND_POINT_TIMEOUT_MS,
+			_vignettingL, _red);
 		if (found == 0)
 		{
 			SysUtil::warningOutput("Corners not found in image " + this->_pairedFiles[i].first);
@@ -87,7 +103,8 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 
 		cv::Mat img2 = cv::imread(this->_pairedFiles[i].second);
 		found = SingleCalibrater::findChessboardCornersTimeout(img2, boardSize, pointBuf2,
-			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK, FIND_POINT_TIMEOUT_MS);
+			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK, FIND_POINT_TIMEOUT_MS,
+			_vignettingR, _red);
 		if (found == 0)
 		{
 			SysUtil::warningOutput("Corners not found in image " + this->_pairedFiles[i].second);

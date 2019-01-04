@@ -18,6 +18,7 @@
 #include <opencv2/highgui.hpp>
 
 //#define ASPECT_RATIO 1.0
+#define FIND_POINT_MIN_AREA_REDDOT 1000
 #ifdef _DEBUG
 #define FIND_POINT_TIMEOUT_MS 10000
 #else
@@ -50,6 +51,9 @@ private:
 	std::vector<std::vector<cv::Point2f>> _imagePoints;
 	cv::Mat _cameraMatrix, _distCoeffs;
 	cv::Size _imageSize;
+
+	cv::Mat _vignetting;
+	bool _red;
 private:
 	// 0::suc 1::fail
 	int readStringList(const std::string& filename, std::vector<std::string>& l);
@@ -60,9 +64,13 @@ public:
 		_cornerHeight = 0;
 		_squareSize = 0;
 		_listFile.resize(0);
+		_red = false;
 	};
 	~SingleCalibrater() {};
 
+	int SetVignettingMat(std::string& vigMat);
+
+	int SetRedSpot(bool redSpot);
 
 	int SetImageList(std::string xmlListFile);
 
@@ -76,7 +84,8 @@ public:
 
 	// 1:found 0:not found -1:timeout
 	static int findChessboardCornersTimeout
-	(cv::Mat &img, cv::Size &boardSize, std::vector<cv::Point2f> &out_pointList, int flag, int timeoutMs);
+	(cv::Mat &img, cv::Size &boardSize, std::vector<cv::Point2f> &out_pointList, int flag, int timeoutMs,
+		cv::Mat &_vignetting = cv::Mat(), bool findRedROI = false);
 };
 
 #endif //__CAMERA_CALIBRATION_SINGLE__

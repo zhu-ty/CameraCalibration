@@ -53,9 +53,16 @@ private:
 	} _cameraIntrinsics[2];
 
 	cv::Mat _R, _T, _R1, _R2, _P1, _P2, _Q;
+
+	cv::Mat _vignettingL, _vignettingR;
+	bool _red;
 private:
 	std::string goodImageList(int x);
 public:
+	int SetVignettingMat(std::string& vigMatLeft, std::string& vigMatRight);
+
+	int SetRedSpot(bool redSpot);
+
 	//Pair 2 img lists, file with same name will be paired
 	int SetImageListAndPair(std::vector<std::string> listFile1, std::vector<std::string> listFile2);
 
