@@ -290,19 +290,25 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 		std::vector<cv::Vec4i> hierarchy;
 		cv::findContours(A, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 		std::vector<Contour> cs;
-		for (int j = 0; j < contours.size(); j++)
+		if (contours.size() >= 4)
 		{
-			Contour c(contours[j]);
-			if(c.area > FIND_POINT_MIN_AREA_REDDOT)
-				cs.push_back(c);
+			for (int j = 0; j < contours.size(); j++)
+			{
+				Contour c(contours[j]);
+				if (c.area > FIND_POINT_MIN_AREA_REDDOT)
+					cs.push_back(c);
+			}
+			if (cs.size() >= 4)
+			{
+				std::sort(cs.begin(), cs.end(), Contour::compBigger);
+				std::vector<cv::Point> finalRectPt(4);
+				for (int j = 0; j < 4; j++)
+				{
+					finalRectPt[j] = cs[j].center;
+				}
+				finalRect = cv::boundingRect(finalRectPt);
+			}
 		}
-		std::sort(cs.begin(), cs.end(), Contour::compBigger);
-		std::vector<cv::Point> finalRectPt(4);
-		for (int j = 0; j < 4; j++)
-		{
-			finalRectPt[j] = cs[j].center;
-		}
-		finalRect = cv::boundingRect(finalRectPt);
 	}
 	cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
 	if (!_vignetting.empty() && _vignetting.size == img.size)
