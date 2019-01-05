@@ -147,7 +147,7 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 	double rms;
 
 	//TODO: check these flags.
-	rms = cv::calibrateCamera(objectPoints, _imagePoints, _imageSize, _cameraMatrix, _distCoeffs, rvecs, tvecs, flags, cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 1000, 1e-5));
+	rms = cv::calibrateCamera(objectPoints, _imagePoints, _imageSize, _cameraMatrix, _distCoeffs, rvecs, tvecs, flags, cv::TermCriteria(cv::TermCriteria::EPS, 1000, 1e-7));
 	SysUtil::infoOutput(SysUtil::format("SingleCalibrater::Calibrate Re-projection error reported by calibrateCamera: %f", rms));
 	if (!(cv::checkRange(_cameraMatrix) && cv::checkRange(_distCoeffs)))
 	{
