@@ -411,8 +411,8 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 				{
 					for (int j = 0; j < out_pointList.size(); j++)
 					{
-						out_pointList[j].x += finalRect.x;
-						out_pointList[j].y += finalRect.y;
+						out_pointList[j].x += (double)finalRect.x;
+						out_pointList[j].y += (double)finalRect.y;
 					}
 				}
 			}

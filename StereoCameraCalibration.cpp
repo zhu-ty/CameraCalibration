@@ -76,6 +76,7 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 	cv::Size boardSize(_cornerWidth, _cornerHeight);
 	std::vector<std::vector<cv::Point2f>> pointList_1;
 	std::vector<std::vector<cv::Point2f>> pointList_2;
+	std::vector<std::string> names;
 	for (int i = 0; i < _pairedFiles.size(); i++)
 	{
 
@@ -123,6 +124,7 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 		SysUtil::infoOutput(SysUtil::format("[Stereo] Found corners (%d) in image ", pointBuf2.size()) + SysUtil::getFileName(this->_pairedFiles[i].second));
 		pointList_1.push_back(pointBuf1);
 		pointList_2.push_back(pointBuf2);
+		names.push_back(SysUtil::getFileName(this->_pairedFiles[i].second));
 	}
 	if (pointList_1.size() <= 0)
 	{
@@ -144,9 +146,9 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 		_cameraIntrinsics[1]._cameraMatrix, _cameraIntrinsics[1]._distCoeffs,
 		_imageSize, _R, _T, _E, _F,
 		_flag,
-		cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 1000, 1e-5));
+		cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 1000, 1e-7));
 	SysUtil::infoOutput(SysUtil::format("StereoCalibrater::Calibrate Re-projection error reported by stereoCalibrate: %f", rms));
-
+	//SysUtil::infoOutput("test");
 	// CALIBRATION QUALITY CHECK
 	// because the output fundamental matrix implicitly
 	// includes all the output information,
@@ -157,6 +159,7 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 	std::vector<cv::Vec3f> lines[2];
 	for (int i = 0; i < pointList_1.size(); i++)
 	{
+		double erri = 0;
 		int npt = (int)pointList_1[i].size();
 		cv::Mat imgpt[2];
 		for (int k = 0; k < 2; k++)
@@ -174,7 +177,9 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 						   fabs(pointList_2[i][j].x*lines[0][j][0] +
 								pointList_2[i][j].y*lines[0][j][1] + lines[0][j][2]);
 			err += errij;
+			erri += errij;
 		}
+		//SysUtil::infoOutput(SysUtil::format("Pair %s, Calibrate epipolar err = %f", names[i].c_str(), erri));
 		npoints += npt;
 	}
 	SysUtil::infoOutput(SysUtil::format("StereoCalibrater::Calibrate Average epipolar err = %f", err / npoints));
