@@ -18,7 +18,7 @@ int SingleCalibrater::readStringList(const std::string & filename, std::vector<s
 	return 0;
 }
 
-int SingleCalibrater::SetVignettingMat(std::string & vigMat)
+int SingleCalibrater::SetVignettingMat(std::string vigMat)
 {
 	if (vigMat != "")
 		_vignetting = cv::imread(vigMat, cv::IMREAD_UNCHANGED);
@@ -228,7 +228,7 @@ int SingleCalibrater::SaveParams(std::string file)
 
 
 int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &boardSize, std::vector<cv::Point2f> &out_pointList, int flag, int timeoutMs,
-	cv::Mat &_vignetting, bool findRedROI)
+	const cv::Mat &_vignetting, bool findRedROI)
 {
 	//pre
 	cv::Rect finalRect(0, 0, img.cols, img.rows);

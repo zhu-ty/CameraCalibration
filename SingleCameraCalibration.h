@@ -68,7 +68,7 @@ public:
 	};
 	~SingleCalibrater() {};
 
-	int SetVignettingMat(std::string& vigMat);
+	int SetVignettingMat(std::string vigMat);
 
 	int SetRedSpot(bool redSpot);
 
@@ -85,7 +85,7 @@ public:
 	// 1:found 0:not found -1:timeout
 	static int findChessboardCornersTimeout
 	(cv::Mat &img, cv::Size &boardSize, std::vector<cv::Point2f> &out_pointList, int flag, int timeoutMs,
-		cv::Mat &_vignetting = cv::Mat(), bool findRedROI = false);
+		const cv::Mat &_vignetting = cv::Mat(), bool findRedROI = false);
 };
 
 #endif //__CAMERA_CALIBRATION_SINGLE__

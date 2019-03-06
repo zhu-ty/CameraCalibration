@@ -6,7 +6,7 @@ std::string StereoCalibrater::goodImageList(int x)
 	return (x % 2 == 0) ? _pairedFiles[x / 2].first : _pairedFiles[x / 2].second;
 }
 
-int StereoCalibrater::SetVignettingMat(std::string& vigMatLeft, std::string& vigMatRight)
+int StereoCalibrater::SetVignettingMat(std::string vigMatLeft, std::string vigMatRight)
 {
 	if (vigMatLeft != "")
 		_vignettingL = cv::imread(vigMatLeft, cv::IMREAD_UNCHANGED);

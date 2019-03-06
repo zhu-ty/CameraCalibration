@@ -60,7 +60,7 @@ private:
 private:
 	std::string goodImageList(int x);
 public:
-	int SetVignettingMat(std::string& vigMatLeft, std::string& vigMatRight);
+	int SetVignettingMat(std::string vigMatLeft, std::string vigMatRight);
 
 	int SetRedSpot(bool redSpot);
 
