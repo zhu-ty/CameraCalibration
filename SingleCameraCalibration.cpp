@@ -288,7 +288,7 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 		std::vector<std::vector<cv::Point>> contours; // Vector for storing contour
 		std::vector<cv::Point> max4c[4];
 		std::vector<cv::Vec4i> hierarchy;
-		cv::findContours(A, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+		cv::findContours(A, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
 		std::vector<Contour> cs;
 		if (contours.size() >= 4)
 		{
