@@ -179,7 +179,7 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 			err += errij;
 			erri += errij;
 		}
-		//SysUtil::infoOutput(SysUtil::format("Pair %s, Calibrate epipolar err = %f", names[i].c_str(), erri));
+		SysUtil::infoOutput(SysUtil::format("Pair %s, Calibrate epipolar err = %f", names[i].c_str(), erri));
 		npoints += npt;
 	}
 	SysUtil::infoOutput(SysUtil::format("StereoCalibrater::Calibrate Average epipolar err = %f", err / npoints));
