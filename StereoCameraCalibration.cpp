@@ -61,7 +61,7 @@ int StereoCalibrater::SetCameraIntrinsics(cv::Mat cameraMatrix1, cv::Mat distCoe
 	return 0;
 }
 
-int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat & R2, cv::Mat & P1, cv::Mat & P2, cv::Mat & Q)
+int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat & R2, cv::Mat & P1, cv::Mat & P2, cv::Mat & Q, bool renameFailFile)
 {
 	if (_pairedFiles.size() == 0)
 	{
@@ -85,6 +85,8 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 		int found = SingleCalibrater::findChessboardCornersTimeout(img1, boardSize, pointBuf1,
 			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK, FIND_POINT_TIMEOUT_MS,
 			_vignettingL, _red);
+		if (found != 1 && renameFailFile)
+			std::rename(this->_pairedFiles[i].first.c_str(), (this->_pairedFiles[i].first + ".rename").c_str());
 		if (found == 0)
 		{
 			SysUtil::warningOutput("Corners not found in image " + this->_pairedFiles[i].first);
@@ -106,6 +108,8 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 		found = SingleCalibrater::findChessboardCornersTimeout(img2, boardSize, pointBuf2,
 			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK, FIND_POINT_TIMEOUT_MS,
 			_vignettingR, _red);
+		if (found != 1 && renameFailFile)
+			std::rename(this->_pairedFiles[i].second.c_str(), (this->_pairedFiles[i].second + ".rename").c_str());
 		if (found == 0)
 		{
 			SysUtil::warningOutput("Corners not found in image " + this->_pairedFiles[i].second);
@@ -121,9 +125,11 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 			SysUtil::errorOutput("Unknown error in finding corners in image " + this->_pairedFiles[i].second);
 			continue;
 		}
-		SysUtil::infoOutput(SysUtil::format("[Stereo] Found corners (%d) in image ", pointBuf2.size()) + SysUtil::getFileName(this->_pairedFiles[i].second));
 		pointList_1.push_back(pointBuf1);
 		pointList_2.push_back(pointBuf2);
+		SysUtil::infoOutput(SysUtil::format("[Stereo] Found corners (%d) in image pair %s (%d)",
+			pointBuf2.size(), SysUtil::getFileName(this->_pairedFiles[i].second).c_str(), pointList_1.size()));
+		
 		names.push_back(SysUtil::getFileName(this->_pairedFiles[i].second));
 	}
 	if (pointList_1.size() <= 0)
@@ -146,7 +152,7 @@ int StereoCalibrater::Calibrate(cv::Mat & R, cv::Mat & T, cv::Mat & R1, cv::Mat 
 		_cameraIntrinsics[1]._cameraMatrix, _cameraIntrinsics[1]._distCoeffs,
 		_imageSize, _R, _T, _E, _F,
 		_flag,
-		cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 1000, 1e-7));
+		cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 1000, 1e-6));
 	SysUtil::infoOutput(SysUtil::format("StereoCalibrater::Calibrate Re-projection error reported by stereoCalibrate: %f", rms));
 	//SysUtil::infoOutput("test");
 	// CALIBRATION QUALITY CHECK

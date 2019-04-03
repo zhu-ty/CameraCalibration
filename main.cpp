@@ -84,6 +84,8 @@ int main(int argc, char* argv[])
 		reader.GetBoolean("CameraCalibration", "RedSpot", false)
 	);
 
+	bool rename = reader.GetBoolean("CameraCalibration", "RenameError", false);
+
     if(reader.GetBoolean("CameraCalibration1","UseListFile",false) == true)
         SinCal1.SetImageList(reader.Get("CameraCalibration1", "ImageList", ""));
     else
@@ -107,7 +109,7 @@ int main(int argc, char* argv[])
         SinCal1.SetImageList(imageNames);
     }
 	cv::Mat cM1, dC1;
-	SinCal1.Calibrate(cM1, dC1);
+	SinCal1.Calibrate(cM1, dC1, rename);
 	SinCal1.SaveParams(reader.Get("CameraCalibration1", "OutputFile", "./result_left.xml"));
 
 
@@ -134,7 +136,7 @@ int main(int argc, char* argv[])
 		SinCal2.SetImageList(imageNames);
 	}
 	cv::Mat cM2, dC2;
-	SinCal2.Calibrate(cM2, dC2);
+	SinCal2.Calibrate(cM2, dC2, rename);
 	SinCal2.SaveParams(reader.Get("CameraCalibration2", "OutputFile", "./result_right.xml"));
 
 
@@ -176,7 +178,7 @@ int main(int argc, char* argv[])
 	}
 
 	cv::Mat R, T, R1, R2, P1, P2, Q;
-	SteCal.Calibrate(R, T, R1, R2, P1, P2, Q);
+	SteCal.Calibrate(R, T, R1, R2, P1, P2, Q, rename);
 	SteCal.SaveParams(
 		reader.Get("StereoCalibration", "OutputFile", "./result_stereo.xml"),
 		reader.Get("StereoCalibration", "OutPutParamDir", "./param/")

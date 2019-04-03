@@ -53,7 +53,7 @@ int SingleCalibrater::SetBoardSize(int cornerWidth, int cornerHeight, double squ
 	return 0;
 }
 
-int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
+int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs, bool renameFailFile)
 {
 	if (_xmlListFile == "" && _listFile.size() == 0)
 	{
@@ -113,15 +113,22 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs)
 			_vignetting, _red);
 		if (found == 1)
 		{
-			SysUtil::infoOutput(SysUtil::format("Found corners (%d) in image ", pointBuf.size()) + fileList[i]);
 			_imagePoints.push_back(pointBuf);
+			SysUtil::infoOutput(SysUtil::format("Found corners (%d) in image %s (%d)",
+				pointBuf.size(), fileList[i].c_str(), _imagePoints.size()));
+			
 		}
-		else if (found == 0)
-			SysUtil::warningOutput("Corners not found in image " + fileList[i]);
-		else if (found == -1)
-			SysUtil::warningOutput("Corners finding in image " + fileList[i] + " over time!");
 		else
-			SysUtil::errorOutput("Unknown error in finding corners in image " + fileList[i]);
+		{
+			if (renameFailFile)
+				std::rename(fileList[i].c_str(), (fileList[i] + ".rename").c_str());
+			if (found == 0)
+				SysUtil::warningOutput("Corners not found in image " + fileList[i]);
+			else if (found == -1)
+				SysUtil::warningOutput("Corners finding in image " + fileList[i] + " over time!");
+			else
+				SysUtil::errorOutput("Unknown error in finding corners in image " + fileList[i]);
+		}
 
 	}
 	if (_imagePoints.size() <= 0)
@@ -290,11 +297,13 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 		std::vector<cv::Vec4i> hierarchy;
 		cv::findContours(A, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
 		std::vector<Contour> cs;
+		std::vector<int> debug_area;
 		if (contours.size() >= 4)
 		{
 			for (int j = 0; j < contours.size(); j++)
 			{
 				Contour c(contours[j]);
+				debug_area.push_back(c.area);
 				if (c.area > FIND_POINT_MIN_AREA_REDDOT)
 					cs.push_back(c);
 			}
@@ -369,6 +378,8 @@ int SingleCalibrater::findChessboardCornersTimeout(cv::Mat &img, cv::Size &board
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 #endif
 	t.detach();
+
+	//renameFailedFile
 
 
 	int i = 0;

@@ -18,7 +18,7 @@
 #include <opencv2/highgui.hpp>
 
 //#define ASPECT_RATIO 1.0
-#define FIND_POINT_MIN_AREA_REDDOT 1000
+#define FIND_POINT_MIN_AREA_REDDOT 500
 #ifdef _DEBUG
 #define FIND_POINT_TIMEOUT_MS 10000
 #else
@@ -78,7 +78,7 @@ public:
 
 	int SetBoardSize(int cornerWidth, int cornerHeight, double squareSize);
 
-	int Calibrate(cv::Mat &cameraMatrix, cv::Mat &distCoeffs);
+	int Calibrate(cv::Mat &cameraMatrix, cv::Mat &distCoeffs, bool renameFailFile = false);
 
 	int SaveParams(std::string file);
 
