@@ -77,37 +77,16 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs, bo
 	_imageSize = cv::Size(cv::imread(fileList[0]).size());
 	cv::Size boardSize(_cornerWidth, _cornerHeight);
 
+#ifdef _DEBUG
+	std::string debug_str = "./debug_test/" + SysUtil::getTimeString() + "/";
+	SysUtil::mkdir("./debug_test");
+	SysUtil::mkdir(debug_str);
+#endif
 	for (int i = 0; i < fileList.size(); i++)
 	{
 		std::vector<cv::Point2f> pointBuf;
 		cv::Mat img = cv::imread(fileList[i]);
 
-
-
-
-
-
-
-		//bool found = cv::findChessboardCorners(img, boardSize, pointBuf,
-		//	cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK);
-		//if (found)
-		//{
-		//	cv::Mat imgGray;
-		//	cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
-		//	cv::cornerSubPix(imgGray, pointBuf, cv::Size(11, 11), cv::Size(-1, -1),
-		//		cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.1));
-		//	_imagePoints.push_back(pointBuf);
-		//	SysUtil::infoOutput("Found corners in image " + fileList[i]);
-
-		//	
-		//	//cv::drawChessboardCorners(img, boardSize, pointBuf, true);
-		//	//cv::imshow("hello", img);
-		//	//cv::waitKey(0);
-		//}
-		//else
-		//{
-		//	SysUtil::warningOutput("Corners not found in image " + fileList[i]);
-		//}
 		int found = SingleCalibrater::findChessboardCornersTimeout(img, boardSize, pointBuf,
 			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK, FIND_POINT_TIMEOUT_MS,
 			_vignetting, _red);
@@ -116,7 +95,12 @@ int SingleCalibrater::Calibrate(cv::Mat & cameraMatrix, cv::Mat & distCoeffs, bo
 			_imagePoints.push_back(pointBuf);
 			SysUtil::infoOutput(SysUtil::format("Found corners (%d) in image %s (%d)",
 				pointBuf.size(), fileList[i].c_str(), _imagePoints.size()));
-			
+#ifdef _DEBUG
+			cv::Mat ToSave = cv::imread(fileList[i]);
+			cv::drawChessboardCorners(ToSave, boardSize, cv::Mat(pointBuf), true);
+			std::string name = SysUtil::getFileName(fileList[i]);
+			cv::imwrite(debug_str + "/" + name, ToSave);
+#endif
 		}
 		else
 		{
